@@ -1,0 +1,201 @@
+/* 主样式文件 */
+#particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+.content-wrapper {
+    position: relative;
+    z-index: 1;
+}
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+.stat-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    background: linear-gradient(145deg, #ffffff, #f3f4f6);
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(79, 70, 229, 0.1), transparent);
+    transform: rotate(45deg);
+    animation: shine 3s infinite;
+}
+@keyframes shine {
+    0% { transform: rotate(45deg) translateY(-100%); }
+    100% { transform: rotate(45deg) translateY(100%); }
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+}
+.contribution-chart {
+    animation: float 6s ease-in-out infinite;
+}
+#searchInput, button, select {
+    transition: all 0.2s ease;
+}
+button:active {
+    transform: scale(0.95);
+}
+.trending-repo {
+    transition: all 0.3s ease;
+}
+.trending-repo:hover {
+    transform: translateX(10px);
+}
+#contributionHeatmap div[class*='bg-green'] {
+    transition: all 0.3s ease;
+    border-radius: 3px;
+}
+#contributionHeatmap div[class*='bg-green']:hover {
+    transform: scale(1.2);
+}
+.loading {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+/* 用户头像和装饰元素的样式 */
+#userAvatarContainer {
+    transition: all 0.5s ease;
+}
+#userAvatar {
+    transition: transform 0.5s ease;
+}
+#userAvatarContainer:hover #userAvatar {
+    transform: scale(1.1);
+}
+.decoration-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+.decoration-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+#octocat svg {
+    transition: all 0.5s ease;
+    fill: currentColor;
+}
+#octocat:hover svg {
+    transform: rotate(20deg);
+    color: #4F46E5;
+}
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+@keyframes float-vertical {
+    0% { transform: translateY(0px) translateZ(0); }
+    50% { transform: translateY(-10px) translateZ(0); }
+    100% { transform: translateY(0px) translateZ(0); }
+}
+@keyframes float-horizontal {
+    0% { transform: translateX(0px); }
+    50% { transform: translateX(10px); }
+    100% { transform: translateX(0px); }
+}
+#leftDecoration, #rightDecoration {
+    animation: float-vertical 10s ease-in-out infinite;
+    position: fixed;
+    z-index: 10;
+    pointer-events: none;
+    will-change: transform;
+    transition: transform 0.5s ease-out;
+}
+#leftDecoration {
+    animation-delay: 0s;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+}
+#rightDecoration {
+    animation-delay: 1s;
+    right: 0;
+    transform: translateX(100%);
+}
+/* 添加触发区域 */
+.decoration-trigger {
+    position: fixed;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    z-index: 9;
+    pointer-events: auto;
+    background-color: rgba(0, 0, 0, 0.01);
+    transition: background-color 0.3s ease;
+}
+#leftTrigger:hover {
+    background-color: rgba(79, 70, 229, 0.05);
+    cursor: pointer;
+}
+#leftTrigger::after {
+    content: '\f054';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    color: rgba(79, 70, 229, 0.5);
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#leftTrigger:hover::after {
+    opacity: 1;
+}
+#leftTrigger {
+    left: 0;
+}
+#rightTrigger {
+    right: 0;
+}
+#leftTrigger:hover + #leftDecoration,
+#leftDecoration:hover {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+#rightTrigger:hover + #rightDecoration,
+#rightDecoration:hover {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+@media (max-width: 1280px) {
+    #leftDecoration, #rightDecoration {
+        width: 40px;
+        overflow: hidden;
+        transition: width 0.3s ease;
+    }
+    #leftDecoration:hover, #rightDecoration:hover {
+        width: 200px;
+    }
+}
+@media (max-width: 768px) {
+    #leftDecoration, #rightDecoration {
+        display: none;
+    }
+}
