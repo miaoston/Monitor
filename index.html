@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Monitor</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">GitHub Monitor</h1>
+            <div class="flex flex-col items-center space-y-4 mb-8">
+                <div class="flex space-x-4">
+                    <input type="text" id="searchInput" placeholder="输入GitHub用户名或组织名" 
+                           class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                    <button onclick="fetchGitHubData()" 
+                            class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                        查询
+                    </button>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer" onclick="toggleAdvancedOptions()">
+                    <span>高级选项</span>
+                    <i class="fas fa-chevron-down" id="advancedOptionsIcon"></i>
+                </div>
+                <div id="advancedOptions" class="hidden w-full max-w-lg">
+                    <div class="flex space-x-4 items-center">
+                        <input type="password" id="githubToken" placeholder="输入GitHub Token（可选）" 
+                               class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="group relative">
+                            <i class="fas fa-info-circle text-gray-400 hover:text-gray-600"></i>
+                            <div class="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 w-64 p-2 bg-gray-800 text-white text-xs rounded-lg mb-2">
+                                提供GitHub Token可以获取更详细的贡献数据，不提供则使用基本API访问。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- 用户/组织数据监控区域 -->
+            <div class="col-span-2 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-semibold mb-6">数据统计</h2>
+                <div id="statsContainer" class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="stat-card bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-600">仓库数</h3>
+                        <p id="repoCount" class="text-3xl font-bold text-blue-600">-</p>
+                    </div>
+                    <div class="stat-card bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-600">Star 数</h3>
+                        <p id="starCount" class="text-3xl font-bold text-green-600">-</p>
+                    </div>
+                    <div class="stat-card bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-600">Fork 数</h3>
+                        <p id="forkCount" class="text-3xl font-bold text-purple-600">-</p>
+                    </div>
+                    <div class="stat-card bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-600">PR 数</h3>
+                        <p id="prCount" class="text-3xl font-bold text-yellow-600">-</p>
+                    </div>
+                </div>
+                <div class="h-72 mb-6">
+                    <canvas id="activityChart"></canvas>
+                </div>
+                <div class="contribution-chart">
+                    <h3 class="text-xl font-semibold mb-4">贡献热力图</h3>
+                    <div id="contributionHeatmap" class="bg-white rounded-lg p-4 overflow-x-auto">
+                        <!-- 贡献热力图将在这里渲染 -->
+                    </div>
+                </div>
+            </div>
+            <!-- GitHub热榜区域 -->
+            <div class="col-span-1 bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-semibold mb-6">GitHub热榜</h2>
+                <div class="flex space-x-4 mb-4">
+                    <select id="languageFilter" class="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">全部语言</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="go">Go</option>
+                    </select>
+                    <select id="timeRange" class="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="daily">今日</option>
+                        <option value="weekly">本周</option>
+                        <option value="monthly">本月</option>
+                    </select>
+                </div>
+                <div id="trendingRepos" class="space-y-4 overflow-y-auto max-h-[600px]">
+                    <!-- 热榜内容将通过JavaScript动态填充 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activityChart = null;
+        let trendingUpdateInterval = null;
+        let contributionData = null;
+
+        async function fetchGitHubData() {
+            const username = document.getElementById('searchInput').value;
+            if (!username) return;
+
+            try {
+                const response = await fetch(`https://api.github.com/users/${username}`);
+                const userData = await response.json();
+
+                if (response.ok) {
+                    updateStats(userData);
+                    await Promise.all([
+                        fetchRepositories(username),
+                        fetchPullRequests(username),
+                        fetchContributions(username)
+                    ]);
+                } else {
+                    alert('未找到该用户或组织');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('获取数据时出错');
+            }
+        }
+
+        function updateStats(userData) {
+            document.getElementById('repoCount').textContent = userData.public_repos || 0;
+            document.getElementById('starCount').textContent = userData.followers || 0;
+        }
+
+        async function fetchRepositories(username) {
+            const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated`);
+            const repos = await response.json();
+
+            let totalForks = 0;
+            repos.forEach(repo => {
+                totalForks += repo.forks_count;
+            });
+
+            document.getElementById('forkCount').textContent = totalForks;
+
+            if (activityChart) {
+                activityChart.destroy();
+            }
+
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            activityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: repos.slice(0, 10).map(repo => repo.name),
+                    datasets: [{
+                        label: 'Stars',
+                        data: repos.slice(0, 10).map(repo => repo.stargazers_count),
+                        borderColor: 'rgb(59, 130, 246)',
+                        tension: 0.1,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                    }, {
+                        label: 'Forks',
+                        data: repos.slice(0, 10).map(repo => repo.forks_count),
+                        borderColor: 'rgb(16, 185, 129)',
+                        tension: 0.1,
+                        fill: true,
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: '最近活跃仓库数据'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchPullRequests(username) {
+            const response = await fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr`);
+            const data = await response.json();
+            document.getElementById('prCount').textContent = data.total_count || 0;
+        }
+
+        async function fetchTrendingRepos() {
+            const language = document.getElementById('languageFilter').value;
+            const timeRange = document.getElementById('timeRange').value;
+            try {
+                const response = await fetch(`https://api.github.com/search/repositories?q=stars:>1${language ? `+language:${language}` : ''}&sort=stars&order=desc&per_page=10`);
+                const data = await response.json();
+                const trendingReposContainer = document.getElementById('trendingRepos');
+                trendingReposContainer.innerHTML = '';
+
+                data.items.forEach(repo => {
+                    const repoElement = document.createElement('div');
+                    repoElement.className = 'p-4 border rounded-lg hover:bg-gray-50';
+                    repoElement.innerHTML = `
+                        <a href="${repo.html_url}" target="_blank" class="block">
+                            <h3 class="text-lg font-medium text-blue-600 hover:underline">${repo.full_name}</h3>
+                            <p class="text-gray-600 text-sm mt-1">${repo.description || '暂无描述'}</p>
+                            <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                                <span><i class="fas fa-star text-yellow-400"></i> ${repo.stargazers_count}</span>
+                                <span><i class="fas fa-code-branch"></i> ${repo.forks_count}</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded">${repo.language || '未知语言'}</span>
+                            </div>
+                        </a>
+                    `;
+                    trendingReposContainer.appendChild(repoElement);
+                });
+            } catch (error) {
+                console.error('获取热榜数据失败:', error);
+            }
+        }
+
+        // 页面加载时获取热榜数据
+        fetchTrendingRepos();
+
+        // 监听筛选条件变化
+        document.getElementById('languageFilter').addEventListener('change', fetchTrendingRepos);
+        document.getElementById('timeRange').addEventListener('change', fetchTrendingRepos);
+
+        async function fetchContributions(username) {
+            try {
+                const token = document.getElementById('githubToken').value;
+                if (!token) {
+                    // 如果没有Token，显示提示信息
+                    document.getElementById('contributionHeatmap').innerHTML = 
+                        `<div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-lock text-4xl mb-4"></i>
+                            <p>提供GitHub Token后可查看详细的贡献数据</p>
+                        </div>`;
+                    return;
+                }
+                const query = `query ($username: String!) {
+                    user(login: $username) {
+                        contributionsCollection {
+                            contributionCalendar {
+                                totalContributions
+                                weeks {
+                                    contributionDays {
+                                        contributionCount
+                                        date
+                                        weekday
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }`;
+
+                const response = await fetch('https://api.github.com/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query,
+                        variables: { username }
+                    })
+                });
+
+                const data = await response.json();
+                if (data.errors) {
+                    throw new Error(data.errors[0].message);
+                }
+
+                const calendar = data.data.user.contributionsCollection.contributionCalendar;
+                contributionData = new Array(53).fill(null).map(() => new Array(7).fill(0));
+
+                calendar.weeks.forEach((week, weekIndex) => {
+                    if (weekIndex < 53) {
+                        week.contributionDays.forEach(day => {
+                            contributionData[weekIndex][day.weekday] = day.contributionCount;
+                        });
+                    }
+                });
+
+                renderContributionHeatmap();
+            } catch (error) {
+                console.error('获取贡献数据失败:', error);
+                alert('获取贡献数据失败，请确保提供了有效的GitHub Token');
+            }
+        }
+
+        function renderContributionHeatmap() {
+            const container = document.getElementById('contributionHeatmap');
+            container.innerHTML = '';
+            
+            const heatmapWrapper = document.createElement('div');
+            heatmapWrapper.className = 'flex flex-col';
+
+            // 创建月份标签
+            const monthLabels = document.createElement('div');
+            monthLabels.className = 'flex text-xs text-gray-400 mb-2 ml-8';
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const today = new Date();
+            for (let i = 11; i >= 0; i--) {
+                const monthDate = new Date(today);
+                monthDate.setMonth(today.getMonth() - i);
+                const monthLabel = document.createElement('div');
+                monthLabel.className = 'mr-8';
+                monthLabel.textContent = months[monthDate.getMonth()];
+                monthLabels.appendChild(monthLabel);
+            }
+            heatmapWrapper.appendChild(monthLabels);
+
+            const graphWrapper = document.createElement('div');
+            graphWrapper.className = 'flex';
+            
+            // 创建星期标签
+            const weekLabels = document.createElement('div');
+            weekLabels.className = 'flex flex-col justify-around text-xs text-gray-400 mr-2';
+            ['周日', '周一', '周三', '周五'].forEach(day => {
+                const label = document.createElement('div');
+                label.textContent = day;
+                weekLabels.appendChild(label);
+            });
+            graphWrapper.appendChild(weekLabels);
+            
+            // 渲染热力图
+            contributionData.forEach((week, weekIndex) => {
+                const weekEl = document.createElement('div');
+                weekEl.className = 'flex flex-col gap-1 mr-1';
+                
+                week.forEach((count, dayIndex) => {
+                    const day = document.createElement('div');
+                    day.className = `w-3 h-3 rounded-sm ${getColorClass(count)} transition-colors duration-200 hover:ring-2 hover:ring-blue-400`;
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - (weekIndex * 7 + (6 - dayIndex)));
+                    day.title = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日: ${count} 个贡献`;
+                    weekEl.appendChild(day);
+                });
+                
+                graphWrapper.appendChild(weekEl);
+            });
+            
+            heatmapWrapper.appendChild(graphWrapper);
+            container.appendChild(heatmapWrapper);
+        }
+
+        function getColorClass(count) {
+            if (count === 0) return 'bg-gray-100';
+            if (count <= 3) return 'bg-green-100';
+            if (count <= 6) return 'bg-green-200';
+            if (count <= 9) return 'bg-green-300';
+            if (count <= 12) return 'bg-green-400';
+            return 'bg-green-500';
+        }
+
+        // 设置自动更新（每5分钟）
+        trendingUpdateInterval = setInterval(fetchTrendingRepos, 5 * 60 * 1000);
+        function toggleAdvancedOptions() {
+            const advancedOptions = document.getElementById('advancedOptions');
+            const icon = document.getElementById('advancedOptionsIcon');
+            if (advancedOptions.classList.contains('hidden')) {
+                advancedOptions.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                advancedOptions.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+    </script>
+</body>
+</html>
