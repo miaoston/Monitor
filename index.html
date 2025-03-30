@@ -132,38 +132,51 @@
             animation: float-vertical 10s ease-in-out infinite;
             position: fixed;
             z-index: 10;
-            pointer-events: auto;
+            pointer-events: none;
             will-change: transform;
-            transition: transform 0.3s ease-out;
+            transition: transform 0.5s ease-out;
         }
         #leftDecoration {
             animation-delay: 0s;
+            left: 0;
             transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
         }
         #rightDecoration {
             animation-delay: 1s;
+            right: 0;
             transform: translateX(100%);
         }
         /* 添加触发区域 */
-        #leftDecoration::before, #rightDecoration::before {
-            content: '';
-            position: absolute;
+        .decoration-trigger {
+            position: fixed;
             top: 0;
-            width: 15px;
+            width: 20px;
             height: 100%;
-            background: transparent;
+            z-index: 9;
+            pointer-events: auto;
+            background-color: rgba(0, 0, 0, 0.01);
+            transition: background-color 0.3s ease;
         }
-        #leftDecoration::before {
-            right: -15px;
+        #leftTrigger:hover {
+            background-color: rgba(79, 70, 229, 0.05);
+            cursor: pointer;
         }
-        #rightDecoration::before {
-            left: -15px;
+        #leftTrigger {
+            left: 0;
         }
+        #rightTrigger {
+            right: 0;
+        }
+        #leftTrigger:hover + #leftDecoration,
         #leftDecoration:hover {
             transform: translateX(0);
+            pointer-events: auto;
         }
+        #rightTrigger:hover + #rightDecoration,
         #rightDecoration:hover {
             transform: translateX(0);
+            pointer-events: auto;
         }
         @media (max-width: 1280px) {
             #leftDecoration, #rightDecoration {
@@ -185,8 +198,10 @@
 <body class="bg-gray-100">
     <div id="particles-js"></div>
     <div class="container mx-auto px-4 py-8 content-wrapper" style="background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);">
+        <!-- 左侧触发区域 -->
+        <div id="leftTrigger" class="decoration-trigger hidden md:block"></div>
         <!-- 左侧用户信息装饰区域 -->
-        <div id="leftDecoration" class="fixed left-4 top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
+        <div id="leftDecoration" class="fixed top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4 transform transition-all duration-500 hover:rotate-2 hover:scale-105 decoration-card">
                 <div id="userAvatarContainer" class="relative mb-4">
                     <div class="w-24 h-24 mx-auto rounded-full bg-gray-200 overflow-hidden relative">
@@ -219,8 +234,10 @@
             </div>
         </div>
         
+        <!-- 右侧触发区域 -->
+        <div id="rightTrigger" class="decoration-trigger hidden md:block"></div>
         <!-- 右侧装饰区域 -->
-        <div id="rightDecoration" class="fixed right-4 top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
+        <div id="rightDecoration" class="fixed top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
             <div class="bg-white rounded-lg shadow-lg p-4 mb-4 transform transition-all duration-500 hover:-rotate-2 hover:scale-105 decoration-card">
                 <h3 class="text-sm font-semibold mb-3 text-center text-gray-700">用户数据</h3>
                 <div class="space-y-3">
