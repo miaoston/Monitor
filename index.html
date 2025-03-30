@@ -134,12 +134,36 @@
             z-index: 10;
             pointer-events: auto;
             will-change: transform;
+            transition: transform 0.3s ease-out;
         }
         #leftDecoration {
             animation-delay: 0s;
+            transform: translateX(-100%);
         }
         #rightDecoration {
             animation-delay: 1s;
+            transform: translateX(100%);
+        }
+        /* 添加触发区域 */
+        #leftDecoration::before, #rightDecoration::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 15px;
+            height: 100%;
+            background: transparent;
+        }
+        #leftDecoration::before {
+            right: -15px;
+        }
+        #rightDecoration::before {
+            left: -15px;
+        }
+        #leftDecoration:hover {
+            transform: translateX(0);
+        }
+        #rightDecoration:hover {
+            transform: translateX(0);
         }
         @media (max-width: 1280px) {
             #leftDecoration, #rightDecoration {
