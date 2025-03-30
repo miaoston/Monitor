@@ -7,17 +7,64 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: linear-gradient(145deg, #ffffff, #f3f4f6);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.8);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+        .contribution-chart {
+            animation: float 6s ease-in-out infinite;
+        }
+        #searchInput, button, select {
+            transition: all 0.2s ease;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        .trending-repo {
+            transition: all 0.3s ease;
+        }
+        .trending-repo:hover {
+            transform: translateX(10px);
+        }
+        #contributionHeatmap div[class*='bg-green'] {
+            transition: all 0.3s ease;
+            border-radius: 3px;
+        }
+        #contributionHeatmap div[class*='bg-green']:hover {
+            transform: scale(1.2);
+        }
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-8" style="background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);">
         <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">GitHub Monitor</h1>
+            <h1 class="text-4xl font-bold mb-2" style="background: linear-gradient(120deg, #4F46E5 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GitHub Monitor</h1>
             <div class="flex flex-col items-center space-y-4 mb-8">
                 <div class="flex space-x-4">
                     <input type="text" id="searchInput" placeholder="输入GitHub用户名或组织名" 
                            class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
                     <button onclick="fetchGitHubData()" 
-                            class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                            class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition duration-200 transform hover:scale-105">
                         查询
                     </button>
                 </div>
@@ -45,19 +92,19 @@
             <div class="col-span-2 bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-2xl font-semibold mb-6">数据统计</h2>
                 <div id="statsContainer" class="grid grid-cols-4 gap-4 mb-8">
-                    <div class="stat-card bg-blue-50 p-4 rounded-lg">
+                    <div class="stat-card p-4 rounded-lg overflow-hidden relative group">
                         <h3 class="text-lg font-medium text-gray-600">仓库数</h3>
                         <p id="repoCount" class="text-3xl font-bold text-blue-600">-</p>
                     </div>
-                    <div class="stat-card bg-green-50 p-4 rounded-lg">
+                    <div class="stat-card p-4 rounded-lg overflow-hidden relative group">
                         <h3 class="text-lg font-medium text-gray-600">Star 数</h3>
                         <p id="starCount" class="text-3xl font-bold text-green-600">-</p>
                     </div>
-                    <div class="stat-card bg-purple-50 p-4 rounded-lg">
+                    <div class="stat-card p-4 rounded-lg overflow-hidden relative group">
                         <h3 class="text-lg font-medium text-gray-600">Fork 数</h3>
                         <p id="forkCount" class="text-3xl font-bold text-purple-600">-</p>
                     </div>
-                    <div class="stat-card bg-yellow-50 p-4 rounded-lg">
+                    <div class="stat-card p-4 rounded-lg overflow-hidden relative group">
                         <h3 class="text-lg font-medium text-gray-600">PR 数</h3>
                         <p id="prCount" class="text-3xl font-bold text-yellow-600">-</p>
                     </div>
@@ -212,7 +259,7 @@
 
                 data.items.forEach(repo => {
                     const repoElement = document.createElement('div');
-                    repoElement.className = 'p-4 border rounded-lg hover:bg-gray-50';
+                    repoElement.className = 'trending-repo p-4 border rounded-lg bg-white shadow-sm hover:shadow-md';
                     repoElement.innerHTML = `
                         <a href="${repo.html_url}" target="_blank" class="block">
                             <h3 class="text-lg font-medium text-blue-600 hover:underline">${repo.full_name}</h3>
@@ -245,7 +292,7 @@
                     // 如果没有Token，显示提示信息
                     document.getElementById('contributionHeatmap').innerHTML = 
                         `<div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-lock text-4xl mb-4"></i>
+                            <i class="fas fa-lock text-4xl mb-4 text-indigo-400 animate-bounce"></i>
                             <p>提供GitHub Token后可查看详细的贡献数据</p>
                         </div>`;
                     return;
