@@ -134,49 +134,12 @@
             z-index: 10;
             pointer-events: none;
             will-change: transform;
-            transition: transform 0.5s ease-out;
         }
         #leftDecoration {
             animation-delay: 0s;
-            left: 0;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
         }
         #rightDecoration {
             animation-delay: 1s;
-            right: 0;
-            transform: translateX(100%);
-        }
-        /* 添加触发区域 */
-        .decoration-trigger {
-            position: fixed;
-            top: 0;
-            width: 20px;
-            height: 100%;
-            z-index: 9;
-            pointer-events: auto;
-            background-color: rgba(0, 0, 0, 0.01);
-            transition: background-color 0.3s ease;
-        }
-        #leftTrigger:hover {
-            background-color: rgba(79, 70, 229, 0.05);
-            cursor: pointer;
-        }
-        #leftTrigger {
-            left: 0;
-        }
-        #rightTrigger {
-            right: 0;
-        }
-        #leftTrigger:hover + #leftDecoration,
-        #leftDecoration:hover {
-            transform: translateX(0);
-            pointer-events: auto;
-        }
-        #rightTrigger:hover + #rightDecoration,
-        #rightDecoration:hover {
-            transform: translateX(0);
-            pointer-events: auto;
         }
         @media (max-width: 1280px) {
             #leftDecoration, #rightDecoration {
