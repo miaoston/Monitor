@@ -84,169 +84,11 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        /* 用户头像和装饰元素的样式 */
-        #userAvatarContainer {
-            transition: all 0.5s ease;
-        }
-        #userAvatar {
-            transition: transform 0.5s ease;
-        }
-        #userAvatarContainer:hover #userAvatar {
-            transform: scale(1.1);
-        }
-        .decoration-card {
-            transition: all 0.3s ease;
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
-        }
-        .decoration-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        #octocat svg {
-            transition: all 0.5s ease;
-            fill: currentColor;
-        }
-        #octocat:hover svg {
-            transform: rotate(20deg);
-            color: #4F46E5;
-        }
-        .line-clamp-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        @keyframes float-vertical {
-            0% { transform: translateY(0px) translateZ(0); }
-            50% { transform: translateY(-10px) translateZ(0); }
-            100% { transform: translateY(0px) translateZ(0); }
-        }
-        @keyframes float-horizontal {
-            0% { transform: translateX(0px); }
-            50% { transform: translateX(10px); }
-            100% { transform: translateX(0px); }
-        }
-        #leftDecoration, #rightDecoration {
-            animation: float-vertical 10s ease-in-out infinite;
-            position: fixed;
-            z-index: 10;
-            pointer-events: none;
-            will-change: transform;
-        }
-        #leftDecoration {
-            animation-delay: 0s;
-        }
-        #rightDecoration {
-            animation-delay: 1s;
-        }
-        @media (max-width: 1280px) {
-            #leftDecoration, #rightDecoration {
-                width: 40px;
-                overflow: hidden;
-                transition: width 0.3s ease;
-            }
-            #leftDecoration:hover, #rightDecoration:hover {
-                width: 200px;
-            }
-        }
-        @media (max-width: 768px) {
-            #leftDecoration, #rightDecoration {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body class="bg-gray-100">
     <div id="particles-js"></div>
     <div class="container mx-auto px-4 py-8 content-wrapper" style="background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);">
-        <!-- 左侧触发区域 -->
-        <div id="leftTrigger" class="decoration-trigger hidden md:block"></div>
-        <!-- 左侧用户信息装饰区域 -->
-        <div id="leftDecoration" class="fixed top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
-            <div class="bg-white rounded-lg shadow-lg p-4 mb-4 transform transition-all duration-500 hover:rotate-2 hover:scale-105 decoration-card">
-                <div id="userAvatarContainer" class="relative mb-4">
-                    <div class="w-24 h-24 mx-auto rounded-full bg-gray-200 overflow-hidden relative">
-                        <img id="userAvatar" src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-br from-transparent to-indigo-500 opacity-20"></div>
-                    </div>
-                    <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-lg">
-                        <i id="userTypeIcon" class="fas fa-user"></i>
-                    </div>
-                </div>
-                <h3 id="userName" class="text-lg font-semibold text-center mb-1 text-gray-800">GitHub用户</h3>
-                <p id="userBio" class="text-sm text-center text-gray-500 mb-3 line-clamp-3">查询GitHub用户或组织的详细信息</p>
-                <div class="flex justify-center space-x-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                        <i class="fas fa-code-branch mr-1"></i> <span id="userRepoCount">-</span>
-                    </span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <i class="fas fa-users mr-1"></i> <span id="userFollowers">-</span>
-                    </span>
-                </div>
-            </div>
-            <div class="relative">
-                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                    <i class="fas fa-chevron-down text-indigo-400 animate-bounce"></i>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg p-4 transform transition-all duration-500 hover:-rotate-2 hover:scale-105 decoration-card">
-                    <h4 class="text-sm font-semibold mb-2 text-gray-700">GitHub小贴士</h4>
-                    <p id="githubTip" class="text-xs text-gray-600">输入用户名或组织名，点击查询按钮获取详细信息。</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 右侧触发区域 -->
-        <div id="rightTrigger" class="decoration-trigger hidden md:block"></div>
-        <!-- 右侧装饰区域 -->
-        <div id="rightDecoration" class="fixed top-1/4 transform -translate-y-1/2 w-48 hidden md:block">
-            <div class="bg-white rounded-lg shadow-lg p-4 mb-4 transform transition-all duration-500 hover:-rotate-2 hover:scale-105 decoration-card">
-                <h3 class="text-sm font-semibold mb-3 text-center text-gray-700">用户数据</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500">加入时间</p>
-                            <p id="userJoinDate" class="text-sm font-medium text-gray-800">-</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-500 mr-3">
-                            <i class="fas fa-code"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500">公开Gist</p>
-                            <p id="userGists" class="text-sm font-medium text-gray-800">-</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-500 mr-3">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500">关注中</p>
-                            <p id="userFollowing" class="text-sm font-medium text-gray-800">-</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="relative">
-                <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
-                    <i class="fas fa-chevron-down text-indigo-400 animate-bounce"></i>
-                </div>
-                <div class="bg-white rounded-lg shadow-lg p-4 transform transition-all duration-500 hover:rotate-2 hover:scale-105 decoration-card">
-                    <div id="octocat" class="flex justify-center mb-2">
-                        <svg width="40" height="40" viewBox="0 0 16 16" class="text-gray-700">
-                            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-                        </svg>
-                    </div>
-                    <p class="text-xs text-center text-gray-600">GitHub Monitor - 实时追踪GitHub数据</p>
-                </div>
-            </div>
-        </div>
         <header class="text-center mb-12">
             <h1 class="text-4xl font-bold mb-2" style="background: linear-gradient(120deg, #4F46E5 0%, #7C3AED 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">GitHub Monitor</h1>
             <div class="flex flex-col items-center space-y-4 mb-8">
@@ -367,7 +209,6 @@
 
                 if (response.ok) {
                     updateStats(userData);
-                    updateUserProfile(userData);
                     await Promise.all([
                         fetchRepositories(username),
                         fetchPullRequests(username),
@@ -385,62 +226,6 @@
         function updateStats(userData) {
             document.getElementById('repoCount').textContent = userData.public_repos || 0;
             document.getElementById('starCount').textContent = userData.followers || 0;
-        }
-
-        function updateUserProfile(userData) {
-            // 更新用户头像
-            const avatarElement = document.getElementById('userAvatar');
-            if (userData.avatar_url) {
-                avatarElement.src = userData.avatar_url;
-            }
-
-            // 更新用户名称
-            document.getElementById('userName').textContent = userData.name || userData.login;
-            
-            // 更新用户简介
-            document.getElementById('userBio').textContent = userData.bio || '暂无简介';
-            
-            // 更新用户类型图标
-            const userTypeIcon = document.getElementById('userTypeIcon');
-            if (userData.type === 'Organization') {
-                userTypeIcon.className = 'fas fa-building';
-            } else {
-                userTypeIcon.className = 'fas fa-user';
-            }
-            
-            // 更新用户数据信息
-            document.getElementById('userRepoCount').textContent = userData.public_repos || 0;
-            document.getElementById('userFollowers').textContent = userData.followers || 0;
-            document.getElementById('userFollowing').textContent = userData.following || 0;
-            document.getElementById('userGists').textContent = userData.public_gists || 0;
-            
-            // 格式化并更新加入日期
-            if (userData.created_at) {
-                const joinDate = new Date(userData.created_at);
-                document.getElementById('userJoinDate').textContent = 
-                    `${joinDate.getFullYear()}年${joinDate.getMonth() + 1}月${joinDate.getDate()}日`;
-            }
-            
-            // 显示装饰区域
-            document.getElementById('leftDecoration').classList.remove('hidden');
-            document.getElementById('rightDecoration').classList.remove('hidden');
-            
-            // 随机选择一个GitHub小贴士
-            const tips = [
-                "GitHub Actions可以帮助你自动化工作流程。",
-                "使用GitHub Pages可以免费托管静态网站。",
-                "GitHub Copilot是一个AI编程助手，可以提高编码效率。",
-                "使用.github/FUNDING.yml文件可以设置赞助按钮。",
-                "GitHub提供了丰富的API，可以构建自己的工具。"
-            ];
-            document.getElementById('githubTip').textContent = tips[Math.floor(Math.random() * tips.length)];
-            
-            // 添加头像动画效果
-            const avatarContainer = document.getElementById('userAvatarContainer');
-            avatarContainer.classList.add('animate-pulse');
-            setTimeout(() => {
-                avatarContainer.classList.remove('animate-pulse');
-            }, 1000);
         }
 
         async function fetchRepositories(username) {
